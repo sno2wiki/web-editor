@@ -55,6 +55,7 @@ export const Editor: React.VFC<{
 
   const linesWrapperRef = useRef<HTMLDivElement>(null);
   const selectionRef = useRef(document.getSelection());
+  const [composed, setComposed] = useState(false); // IME用
 
   const [lines, setCurrentLines] = useState<{ id: string; text: string; }[]>(online.lines);
   const linesHTML = useMemo(() => buildLines(lines), [lines]);
@@ -84,15 +85,19 @@ export const Editor: React.VFC<{
     document.addEventListener("selectionchange", handleSelection);
     return () => document.removeEventListener("selectionchange", handleSelection);
   }, []);
-  /*
   // Selectionからカーソル位置を決定
   useEffect(() => {
-    if (!selection) return;
-    const { anchor, focus } = selection;
-    if (anchor.position !== focus.position || anchor.offset !== focus.offset) return;
-    console.log(anchor, focus);
-  }, [selection]);
-  */
+    if (
+      !composed
+      && selection
+      && selection.anchor.position === selection.focus.position
+      && selection.anchor.offset === selection.focus.offset
+    ) {
+      const [focusLineId, focusIndexStr] = selection.focus.position.split("-");
+      const focusIndex = parseInt(focusIndexStr, 10);
+      setCursor({ lineId: focusLineId, index: focusIndex + selection.focus.offset - 1 });
+    }
+  }, [composed, selection]);
   // カーソル位置をSelectionに反映
   useEffect(() => {
     if (!cursor || !selectionRef.current || !linesWrapperRef.current) return;
@@ -100,6 +105,7 @@ export const Editor: React.VFC<{
     selectionRef.current.removeAllRanges();
     const range = new Range();
     if (cursor.index === 0) {
+      // TODO: br時の対応
       const $char = linesWrapperRef.current.querySelector(`[char-position="${cursor.lineId}-1"]`);
       if (!$char) return;
       range.setStartBefore($char);
@@ -114,9 +120,6 @@ export const Editor: React.VFC<{
     }
   }, [cursor]);
 
-  // IME用
-  const [composed, setComposed] = useState(false);
-
   const updateLines = useCallback(() => {
     if (!linesWrapperRef.current) return;
     const $lines = linesWrapperRef.current.children;
@@ -126,9 +129,23 @@ export const Editor: React.VFC<{
     }));
     const { nextLines, nextCursor, commits } = calcNextLines(lines, tempLines);
     setCurrentLines(nextLines);
-    setCursor(() => nextCursor || cursor);
     pushCommits(commits);
-  }, [cursor, lines, pushCommits]);
+    setCursor((previous) => nextCursor || previous);
+    if (!nextCursor) {
+      const anchorPosition = selectionRef.current?.anchorNode?.parentElement?.getAttribute("char-position");
+      const anchorOffset = selectionRef.current?.anchorOffset;
+      const focusPosition = selectionRef.current?.focusNode?.parentElement?.getAttribute("char-position");
+      const focusOffset = selectionRef.current?.focusOffset;
+      console.log(anchorPosition, anchorOffset, focusPosition, focusOffset);
+
+      if (anchorPosition && anchorOffset && focusPosition && focusOffset) {
+        setSelection({
+          anchor: { position: anchorPosition, offset: anchorOffset },
+          focus: { position: focusPosition, offset: focusOffset },
+        });
+      }
+    }
+  }, [lines, pushCommits]);
   return (
     <div className={css({ overflow: "hidden" })}>
       <div>
