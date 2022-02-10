@@ -112,7 +112,7 @@ export const Editor: React.VFC<{ online: { head: string; lines: { id: string; te
   }, [cursor]);
 
   // IME用
-  const [composed, setComposed] = useState(true);
+  const [composed, setComposed] = useState(false);
 
   const updateLines = () => {
     if (!linesWrapperRef.current) return;
