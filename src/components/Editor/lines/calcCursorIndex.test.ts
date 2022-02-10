@@ -1,6 +1,6 @@
 import { calcCursorIndex } from "./calcCursorIndex";
 
-describe("calcCursorIndex", () => {
+describe("calcCursorIndex()", () => {
   test("等しいなら-1を返す", () => {
     const actual = calcCursorIndex("ABC", "ABC");
     expect(actual).toBe(-1);

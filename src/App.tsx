@@ -1,8 +1,8 @@
 import { css } from "@emotion/css";
 import React from "react";
 
-import { createCommitId, createLineId } from "./common/generateId";
 import { Editor } from "./components/Editor";
+import { createCommitId, createLineId } from "./components/Editor/lines/createId";
 
 export const App: React.VFC = () => {
   return (

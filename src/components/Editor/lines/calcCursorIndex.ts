@@ -13,8 +13,3 @@ export const calcCursorIndex = (prev: string, next: string): number => {
     else return next.split("").findIndex((char, i) => prev[i] !== char);
   }
 };
-
-/*
-abcde
-cde
-*/

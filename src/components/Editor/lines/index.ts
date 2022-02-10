@@ -1,1 +1,1 @@
-export { calcNextLines } from "./updateLines";
+export { calcNextLines } from "./calcNextLines";

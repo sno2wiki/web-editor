@@ -5,7 +5,13 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "jest"
+    "test": "jest",
+    "lint": "run-s lint:eslint lint:dprint",
+    "lint:eslint": "eslint . --ext .js,.jsx,.ts,.tsx --cache",
+    "lint:dprint": "dprint check --config ./dprint.json",
+    "fmt": "run-s fmt:eslint fmt:dprint",
+    "fmt:eslint": "npm run lint:eslint -- --fix",
+    "fmt:dprint": "dprint fmt --config ./dprint.json"
   },
   "dependencies": {
     "@emotion/css": "^11.7.1",

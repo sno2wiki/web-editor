@@ -1,6 +1,5 @@
-import { createCommitId, createLineId } from "~/common/generateId";
-
 import { calcCursorIndex } from "./calcCursorIndex";
+import { createCommitId, createLineId } from "./createId";
 
 type InsertCommit = { id: string; type: "INSERT"; payload: { prevLineId: string; newLineId: string; text: string; }; };
 type UpdateCommit = { id: string; type: "UPDATE"; payload: { lineId: string; text: string; }; };
@@ -46,6 +45,5 @@ export const calcNextLines = (
       nextLines.push(tempLine);
     }
   });
-  console.log(nextLines, commits, nextCursor);
   return { nextLines, nextCursor, commits };
 };
