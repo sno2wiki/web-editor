@@ -1,10 +1,6 @@
 import { calcCursorIndex } from "./calcCursorIndex";
 import { createCommitId, createLineId } from "./createId";
-
-type InsertCommit = { id: string; type: "INSERT"; payload: { prevLineId: string; newLineId: string; text: string; }; };
-type UpdateCommit = { id: string; type: "UPDATE"; payload: { lineId: string; text: string; }; };
-type DeleteCommit = { id: string; type: "DELETE"; payload: { lineId: string; }; };
-type Commit = InsertCommit | UpdateCommit | DeleteCommit;
+import { Commit } from "./types";
 
 export const calcNextLines = (
   prevLines: { id: string; text: string; }[],
@@ -16,34 +12,39 @@ export const calcNextLines = (
 } => {
   const commits: Commit[] = [];
   const nextLines: { id: string; text: string; }[] = [];
-  const deletedLines: { id: string; text: string; }[] = [];
   let nextCursor: { lineId: string; index: number; } | undefined = undefined;
-  tempLines.forEach((tempLine, i) => {
+
+  tempLines.forEach((tempLine) => {
     if (nextLines.map(({ id }) => id).includes(tempLine.id)) {
       const newLineId = createLineId();
-      const commit: InsertCommit = {
-        id: createCommitId(),
+      commits.push({
         type: "INSERT",
+        id: createCommitId(),
         payload: { prevLineId: tempLine.id, newLineId, text: tempLine.text },
-      };
-      commits.push(commit);
+      });
       nextLines.push({ id: newLineId, text: tempLine.text });
       nextCursor = { lineId: newLineId, index: 0 };
     } else {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const prevLine = prevLines.find(({ id }) => id === tempLine.id)!;
       if (prevLine.text !== tempLine.text) {
-        const commit: UpdateCommit = {
-          id: createCommitId(),
+        commits.push({
           type: "UPDATE",
+          id: createCommitId(),
           payload: { lineId: tempLine.id, text: tempLine.text },
-        };
-        commits.push(commit);
+        });
         const index = calcCursorIndex(prevLine.text, tempLine.text);
         if (index !== -1) nextCursor = { lineId: tempLine.id, index };
       }
       nextLines.push(tempLine);
     }
+  });
+  prevLines.filter(({ id }) => !nextLines.map(({ id }) => id).includes(id)).forEach((deleted) => {
+    commits.push({
+      type: "DELETE",
+      id: createCommitId(),
+      payload: { lineId: deleted.id },
+    });
   });
   return { nextLines, nextCursor, commits };
 };
