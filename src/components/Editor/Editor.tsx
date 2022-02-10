@@ -1,11 +1,14 @@
 import { css } from "@emotion/css";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { buildLines } from "./builders";
-import { calcNextLines } from "./lines";
+import { calcNextLines, Commit } from "./lines";
 
-export const Editor: React.VFC<{ online: { head: string; lines: { id: string; text: string; }[]; }; }> = (
-  { online },
+export const Editor: React.VFC<{
+  online: { head: string; lines: { id: string; text: string; }[]; };
+  pushCommits(commits: Commit[]): void;
+}> = (
+  { online, pushCommits },
 ) => {
   /*
   const [charPositions, setCharPosition] = useReducer(
@@ -114,17 +117,18 @@ export const Editor: React.VFC<{ online: { head: string; lines: { id: string; te
   // IME用
   const [composed, setComposed] = useState(false);
 
-  const updateLines = () => {
+  const updateLines = useCallback(() => {
     if (!linesWrapperRef.current) return;
     const $lines = linesWrapperRef.current.children;
     const tempLines = [...$lines].map(($line) => ({
       id: $line.getAttribute("line-id") as string,
       text: $line.textContent || "",
     }));
-    const { nextLines, nextCursor } = calcNextLines(lines, tempLines);
+    const { nextLines, nextCursor, commits } = calcNextLines(lines, tempLines);
     setCurrentLines(nextLines);
     setCursor(() => nextCursor || cursor);
-  };
+    pushCommits(commits);
+  }, [cursor, lines, pushCommits]);
   return (
     <div className={css({ overflow: "hidden" })}>
       <div>

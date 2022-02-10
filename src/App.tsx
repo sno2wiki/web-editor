@@ -26,6 +26,9 @@ export const App: React.VFC = () => {
             { id: createLineId(), text: "استمع (؟·معلومات)، ومعناها" },
           ],
         }}
+        pushCommits={(commits) => {
+          // console.dir(commits);
+        }}
       />
     </div>
   );
