@@ -1,0 +1,14 @@
+@import "the-new-css-reset/css/reset.css";
+
+html {
+  user-select: none;
+}
+
+body {
+  min-height: 100vh;
+  overflow-y: scroll;
+}
+
+::selection {
+  background-color: #00f5;
+}

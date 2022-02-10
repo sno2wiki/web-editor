@@ -1,0 +1,46 @@
+{
+  "name": "@mywiki/web-frontend",
+  "packageManager": "pnpm@6.30.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@emotion/css": "^11.7.1",
+    "direction": "^2.0.1",
+    "nanoid": "^3.2.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-use": "^17.3.2",
+    "the-new-css-reset": "^1.4.7",
+    "ulid": "^2.3.0"
+  },
+  "devDependencies": {
+    "@swc/core": "^1.2.138",
+    "@swc/jest": "^0.2.17",
+    "@tsconfig/node16": "^1.0.2",
+    "@types/jest": "^27.4.0",
+    "@types/node": "^17.0.16",
+    "@types/react": "^17.0.39",
+    "@types/react-dom": "^17.0.11",
+    "@typescript-eslint/eslint-plugin": "^5.10.1",
+    "@typescript-eslint/parser": "^5.10.1",
+    "@vitejs/plugin-react": "^1.1.4",
+    "eslint": "^8.8.0",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-jest": "^26.0.0",
+    "eslint-plugin-jest-formatting": "^3.1.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-react": "^7.28.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "eslint-plugin-unused-imports": "^2.0.0",
+    "jest": "^27.5.1",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^4.5.5",
+    "vite": "^2.7.13",
+    "vite-tsconfig-paths": "^3.4.0"
+  }
+}
