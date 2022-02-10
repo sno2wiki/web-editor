@@ -1,33 +1,28 @@
-import React, { useEffect, useMemo, useState } from "react";
-
-import { CharKey } from "./Editor";
+import { css } from "@emotion/css";
+import { direction as checkDirection } from "direction";
+import React, { useMemo } from "react";
 
 export const Line: React.VFC<
-  {
-    lineId: string;
-    givenText: string | null;
-    notifyPosition(
-      key: CharKey,
-      payload: { inlineStart: [number, number]; inlineEnd: [number, number]; height: number; },
-    ): void;
-  }
+  { lineId: string; text: string; }
 > = (
-  { lineId, givenText, notifyPosition },
+  { lineId, text },
 ) => {
-  const [text, setText] = useState<string | null>(givenText);
-  useEffect(() => {
-    setText(givenText);
-  }, [givenText]);
-  const Element = useMemo(() => <span>{text}</span>, [text]);
-
-  return (
-    <p id={lineId}>
-      {text !== null && <span>{text}</span>}
-      {text === null && <br />}
-    </p>
+  const textDirection = useMemo<"ltr" | "rtl">(() => {
+    const dir = checkDirection(text);
+    return dir === "neutral" ? "ltr" : dir;
+  }, [text]);
+  const html = useMemo(
+    () => text.split("").map((char, i) => `<span char-key="${lineId}-${i + 1}">${char}</span>`).join(""),
+    [lineId, text],
   );
 
-  /*
+  return (
+    <div line-id={lineId} className={css({ caretColor: "red" })} dangerouslySetInnerHTML={{ __html: html }}>
+    </div>
+  );
+};
+
+/*
   const textDirection = useMemo<"ltr" | "rtl">(() => {
     const dir = checkDirection(text);
     return dir === "neutral" ? "ltr" : dir;
@@ -84,4 +79,3 @@ export const Line: React.VFC<
     </p>
   );
   */
-};

@@ -1,44 +1,13 @@
 import { css } from "@emotion/css";
-import React, { Fragment, useEffect, useReducer, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
+import { buildLines } from "./builders";
 import { calcNextLines } from "./lines";
 
-export type CharKey = `${string}-${number}`;
-
-export const Cursor: React.VFC<{ basePosition: { left: number; top: number; height: number; }; }> = (
-  { basePosition: basePoint },
-) => {
-  return (
-    <div
-      style={{ left: basePoint.left, top: basePoint.top, height: basePoint.height }}
-      className={css({ position: "absolute" })}
-    >
-      <div className={css({ position: "absolute", width: 2, height: "100%", top: 0, left: -1, background: "black" })}>
-      </div>
-      {
-        /*
-          <div
-            className={css({
-              position: "absolute",
-              top: "100%",
-              display: "flex",
-              flexDirection: "column",
-            })}
-          >
-            <div>Strong</div>
-            <div>Italic</div>
-          </div>
-        */
-      }
-    </div>
-  );
-};
-
-export const Editor: React.VFC<{
-  online: { head: string; lines: { id: string; text: string; }[]; };
-}> = (
+export const Editor: React.VFC<{ online: { head: string; lines: { id: string; text: string; }[]; }; }> = (
   { online },
 ) => {
+  /*
   const [charPositions, setCharPosition] = useReducer(
     (
       previous: Map<CharKey, { inlineStart: [number, number]; inlineEnd: [number, number]; height: number; }>,
@@ -50,11 +19,6 @@ export const Editor: React.VFC<{
     new Map(),
   );
 
-  const [cursor, setCursor] = useState<{ lineId: string; index: number; } | undefined>(undefined);
-  const [lines, setCurrentLines] = useState<{ id: string; text: string; }[]>(online.lines);
-  useEffect(() => {
-    setCurrentLines(online.lines);
-  }, [online]);
   /*
   const updateLine = (targetLineId: string, text: string) => {
     console.log(lines.map((line) => line.id === targetLineId ? { ...line, text } : line));
@@ -62,32 +26,8 @@ export const Editor: React.VFC<{
   };
   */
 
-  const [selection, setSelection] = useState<
-    { anchor: { char: CharKey; offset: number; }; focus: { char: CharKey; offset: number; }; }
-  >();
-  const linesRef = useRef<HTMLDivElement>(null);
+  /*
 
-  useEffect(() => {
-    const selection = document.getSelection();
-    const handleSelection = () => {
-      if (!selection) return;
-
-      // selection.removeAllRanges();
-
-      /*
-      const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
-      const anchorLineId = anchorNode?.parentElement?.parentElement?.getAttribute("line-id");
-      const focusLineId = focusNode?.parentElement?.parentElement?.getAttribute("line-id");
-      setSelection({
-        anchor: { char: anchorLineId as CharKey, offset: anchorOffset },
-        focus: { char: focusLineId as CharKey, offset: focusOffset },
-      });
-      */
-    };
-
-    document.addEventListener("selectionchange", handleSelection);
-    return () => document.removeEventListener("selectionchange", handleSelection);
-  }, []);
   /*
   const cursorPosition = useMemo<{ left: number; top: number; height: number; } | undefined>(() => {
     if (!selection?.focus) return;
@@ -110,46 +50,60 @@ export const Editor: React.VFC<{
   }, [selection, charPositions]);
   */
 
-  const [decided, setDecided] = useState(true);
-  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-    /*
-    const current = Object.fromEntries([...e.currentTarget.children].map(
-      ($line) => [$line.id, { text: $line.textContent as string }],
-    ));
-    setLines(
-      (previous) =>
-        previous.map(
-          (line) => line.id in current ? { id: line.id, ...current[line.id] } : { id: line.id, text: null },
-        ),
-    );
-    */
-  };
+  const linesWrapperRef = useRef<HTMLDivElement>(null);
   const selectionRef = useRef(document.getSelection());
-  const updateLines = () => {
-    if (!linesRef.current) return;
-    const $lines = linesRef.current.children;
-    const tempLines = [...$lines].map(($line) => ({
-      id: $line.getAttribute("line-id") as string,
-      text: $line.textContent || "",
-    }));
-    const { nextLines, nextCursor } = calcNextLines(lines, tempLines);
-    setCurrentLines(nextLines);
-    setCursor(() => nextCursor || cursor);
-    setDecided(true);
-  };
+
+  const [lines, setCurrentLines] = useState<{ id: string; text: string; }[]>(online.lines);
+  const linesHTML = useMemo(() => buildLines(lines), [lines]);
   useEffect(() => {
-    if (!cursor || !selectionRef.current || !linesRef.current) return;
+    setCurrentLines(online.lines);
+  }, [online]);
+
+  const [selection, setSelection] = useState<
+    { anchor: { position: string; offset: number; }; focus: { position: string; offset: number; }; }
+  >();
+  const [cursor, setCursor] = useState<{ lineId: string; index: number; } | undefined>(undefined);
+
+  // 選択範囲を監視
+  useEffect(() => {
+    const handleSelection = () => {
+      if (!selectionRef.current) return;
+      const { anchorNode, anchorOffset, focusNode, focusOffset } = selectionRef.current;
+      if (!anchorNode || anchorNode.nodeName !== "#text" || !focusNode || focusNode.nodeName !== "#text") return;
+      const anchorPosition = anchorNode.parentElement?.getAttribute("char-position");
+      const focusPosition = focusNode.parentElement?.getAttribute("char-position");
+      if (!anchorPosition || !focusPosition) return;
+      setSelection({
+        anchor: { position: anchorPosition, offset: anchorOffset },
+        focus: { position: focusPosition, offset: focusOffset },
+      });
+    };
+    document.addEventListener("selectionchange", handleSelection);
+    return () => document.removeEventListener("selectionchange", handleSelection);
+  }, []);
+  /*
+  // Selectionからカーソル位置を決定
+  useEffect(() => {
+    if (!selection) return;
+    const { anchor, focus } = selection;
+    if (anchor.position !== focus.position || anchor.offset !== focus.offset) return;
+    console.log(anchor, focus);
+  }, [selection]);
+  */
+  // カーソル位置をSelectionに反映
+  useEffect(() => {
+    if (!cursor || !selectionRef.current || !linesWrapperRef.current) return;
 
     selectionRef.current.removeAllRanges();
     const range = new Range();
     if (cursor.index === 0) {
-      const $char = linesRef.current.querySelector(`[char-key="${cursor.lineId}-1"]`);
+      const $char = linesWrapperRef.current.querySelector(`[char-position="${cursor.lineId}-1"]`);
       if (!$char) return;
       range.setStartBefore($char);
       range.setStartBefore($char);
       selectionRef.current.addRange(range);
     } else {
-      const $char = linesRef.current.querySelector(`[char-key="${cursor.lineId}-${cursor.index}"]`);
+      const $char = linesWrapperRef.current.querySelector(`[char-position="${cursor.lineId}-${cursor.index}"]`);
       if (!$char) return;
       range.setStartAfter($char);
       range.setEndAfter($char);
@@ -157,75 +111,51 @@ export const Editor: React.VFC<{
     }
   }, [cursor]);
 
+  // IME用
+  const [composed, setComposed] = useState(true);
+
+  const updateLines = () => {
+    if (!linesWrapperRef.current) return;
+    const $lines = linesWrapperRef.current.children;
+    const tempLines = [...$lines].map(($line) => ({
+      id: $line.getAttribute("line-id") as string,
+      text: $line.textContent || "",
+    }));
+    const { nextLines, nextCursor } = calcNextLines(lines, tempLines);
+    setCurrentLines(nextLines);
+    setCursor(() => nextCursor || cursor);
+  };
   return (
     <div className={css({ overflow: "hidden" })}>
       <div>
-        <p className={css({ fontFamily: "monospace" })}>{JSON.stringify(cursor)}</p>
+        <p className={css({ fontFamily: "monospace" })}>SELECTION_A:{JSON.stringify(selection?.anchor)}</p>
+        <p className={css({ fontFamily: "monospace" })}>SELECTION_F:{JSON.stringify(selection?.focus)}</p>
+        <p className={css({ fontFamily: "monospace" })}>CURSOR:{JSON.stringify(cursor)}</p>
       </div>
-      {
-        /*
-      cursorPosition && <Cursor basePosition={cursorPosition} />
-        */
-      }
       <div
         className={css({ position: "relative" })}
-        ref={linesRef}
+        ref={linesWrapperRef}
         role={"textbox"}
         spellCheck={false}
         autoCorrect={"off"}
         autoCapitalize={"none"}
         translate={"no"}
-        aria-multiline="true"
-        aria-autocomplete="list"
-        aria-expanded="false"
         contentEditable
         suppressContentEditableWarning
         onInput={() => {
-          if (!decided) return;
+          if (composed) return;
           updateLines();
+          setComposed(false);
         }}
         onCompositionStart={() => {
-          setDecided(false);
+          setComposed(true);
         }}
         onCompositionEnd={() => {
           updateLines();
+          setComposed(false);
         }}
+        dangerouslySetInnerHTML={{ __html: linesHTML }}
       >
-        {lines.map(({ id, text }) => (
-          <Fragment key={id}>
-            <div
-              line-id={id}
-              className={css({ caretColor: "red" })}
-              dangerouslySetInnerHTML={{
-                __html: text.split("").map((char, i) => `<span char-key="${id}-${i + 1}">${char}</span>`).join(""),
-              }}
-            >
-              {
-                /*
-              text.split("").map((char, i) => (
-                <span
-                  key={i + 1}
-                  char-key={`${id}-${i + 1}`}
-                  dangerouslySetInnerHTML={{ __html: char }}
-                >
-                </span>
-              ))
-            */
-              }
-            </div>
-            {text === null && <br />}
-          </Fragment>
-        ))}
-        {
-          /*
-          <Line
-            key={id}
-            lineId={id}
-            givenText={text}
-            notifyPosition={(key, payload) => 0  setCharPosition({ key, payload }) }
-          />
-        */
-        }
       </div>
     </div>
   );

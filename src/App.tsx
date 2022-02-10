@@ -20,10 +20,10 @@ export const App: React.VFC = () => {
             { id: createLineId(), text: "ダークらき☆すたｷﾀ━━━━(ﾟ∀ﾟ)━━━━!!" },
             { id: createLineId(), text: "...where you must rest your weary bones" },
             { id: createLineId(), text: "シメジシミュレーション" },
-            { id: createLineId(), text: "@" },
             { id: createLineId(), text: "インターネットやめないで" },
-            //  { id: createLineId(), text: "<strong>A</strong>" },
-            //  { id: "linesp1", text: "استمع (؟·معلومات)، ومعناها" },
+            { id: createLineId(), text: "@" },
+            { id: createLineId(), text: "<strong>A</strong>" },
+            { id: createLineId(), text: "استمع (؟·معلومات)، ومعناها" },
           ],
         }}
       />
