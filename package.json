@@ -1,6 +1,7 @@
 {
-  "name": "@mywiki/web-frontend",
+  "name": "@sno2wiki/editor",
   "packageManager": "pnpm@6.30.0",
+  "main": "./src/index.ts",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

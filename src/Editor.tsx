@@ -7,8 +7,10 @@ import { calcNextLines, Commit } from "./lines";
 export const Editor: React.VFC<{
   online: { head: string; lines: { id: string; text: string; }[]; };
   pushCommits(commits: Commit[]): void;
+  generateCommitId(): string;
+  generateLineId(): string;
 }> = (
-  { online, pushCommits },
+  { online, pushCommits, generateCommitId, generateLineId },
 ) => {
   /*
   const [charPositions, setCharPosition] = useReducer(
@@ -127,7 +129,14 @@ export const Editor: React.VFC<{
       id: $line.getAttribute("line-id") as string,
       text: $line.textContent || "",
     }));
-    const { nextLines, nextCursor, commits } = calcNextLines(lines, tempLines);
+    const { nextLines, nextCursor, commits } = calcNextLines(
+      lines,
+      tempLines,
+      {
+        generateCommitId,
+        generateLineId,
+      },
+    );
     setCurrentLines(nextLines);
     pushCommits(commits);
     setCursor((previous) => nextCursor || previous);

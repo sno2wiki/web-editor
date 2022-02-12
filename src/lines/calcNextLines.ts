@@ -1,10 +1,13 @@
 import { calcCursorIndex } from "./calcCursorIndex";
-import { createCommitId, createLineId } from "./createId";
 import { Commit } from "./types";
 
 export const calcNextLines = (
   prevLines: { id: string; text: string; }[],
   tempLines: { id: string; text: string; }[],
+  { generateCommitId, generateLineId }: {
+    generateCommitId: () => string;
+    generateLineId: () => string;
+  },
 ): {
   commits: Commit[];
   nextLines: { id: string; text: string; }[];
@@ -16,10 +19,10 @@ export const calcNextLines = (
 
   tempLines.forEach((tempLine) => {
     if (nextLines.map(({ id }) => id).includes(tempLine.id)) {
-      const newLineId = createLineId();
+      const newLineId = generateLineId();
       commits.push({
         type: "INSERT",
-        id: createCommitId(),
+        id: generateCommitId(),
         payload: { prevLineId: tempLine.id, newLineId, text: tempLine.text },
       });
       nextLines.push({ id: newLineId, text: tempLine.text });
@@ -30,7 +33,7 @@ export const calcNextLines = (
       if (prevLine.text !== tempLine.text) {
         commits.push({
           type: "UPDATE",
-          id: createCommitId(),
+          id: generateCommitId(),
           payload: { lineId: tempLine.id, text: tempLine.text },
         });
         const index = calcCursorIndex(prevLine.text, tempLine.text);
@@ -42,7 +45,7 @@ export const calcNextLines = (
   prevLines.filter(({ id }) => !nextLines.map(({ id }) => id).includes(id)).forEach((deleted) => {
     commits.push({
       type: "DELETE",
-      id: createCommitId(),
+      id: generateCommitId(),
       payload: { lineId: deleted.id },
     });
   });
