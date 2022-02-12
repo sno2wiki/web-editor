@@ -1,19 +1,19 @@
 import { calcCursorIndex } from "./calcCursorIndex";
-import { Commit } from "./types";
+import { CommitIdGenerator, CommitUnion, LineIdGenerator } from "./types";
 
 export const calcNextLines = (
   prevLines: { id: string; text: string; }[],
   tempLines: { id: string; text: string; }[],
   { generateCommitId, generateLineId }: {
-    generateCommitId: () => string;
-    generateLineId: () => string;
+    generateCommitId: CommitIdGenerator;
+    generateLineId: LineIdGenerator;
   },
 ): {
-  commits: Commit[];
+  commits: CommitUnion[];
   nextLines: { id: string; text: string; }[];
   nextCursor: { lineId: string; index: number; } | undefined;
 } => {
-  const commits: Commit[] = [];
+  const commits: CommitUnion[] = [];
   const nextLines: { id: string; text: string; }[] = [];
   let nextCursor: { lineId: string; index: number; } | undefined = undefined;
 

@@ -1,31 +1,34 @@
-import { calcNextLines } from ".";
-import { createCommitId, createLineId } from "./createId";
+import { calcNextLines } from "./calcNextLines";
+import { CommitIdGenerator, LineIdGenerator } from "./types";
 
-jest.mock("./createId");
-const mockedCreateCommitId = createCommitId as unknown as jest.Mock<
-  ReturnType<typeof createCommitId>,
-  Parameters<typeof createCommitId>
+const mockGenerateCommitId = jest.fn() as jest.Mock<
+  ReturnType<CommitIdGenerator>,
+  Parameters<CommitIdGenerator>
 >;
-const mockedCreateLineId = createLineId as unknown as jest.Mock<
-  ReturnType<typeof createLineId>,
-  Parameters<typeof createLineId>
+const mockGenerateLindId = jest.fn() as jest.Mock<
+  ReturnType<LineIdGenerator>,
+  Parameters<LineIdGenerator>
 >;
 
 describe("calcNextLines()", () => {
   beforeEach(() => {
-    mockedCreateCommitId.mockRestore();
-    mockedCreateLineId.mockRestore();
+    mockGenerateCommitId.mockRestore();
+    mockGenerateLindId.mockRestore();
   });
 
   afterEach(() => {
-    mockedCreateCommitId.mockClear();
-    mockedCreateLineId.mockClear();
+    mockGenerateCommitId.mockClear();
+    mockGenerateLindId.mockClear();
   });
 
   test("do nothing #1", () => {
     const actual = calcNextLines(
       [{ id: "line1", text: "ABC" }],
       [{ id: "line1", text: "ABC" }],
+      {
+        generateCommitId: mockGenerateCommitId,
+        generateLineId: mockGenerateLindId,
+      },
     );
     expect(actual.nextLines).toStrictEqual(
       [{ id: "line1", text: "ABC" }],
@@ -40,6 +43,10 @@ describe("calcNextLines()", () => {
     const actual = calcNextLines(
       [{ id: "line1", text: "ABC" }, { id: "line2", text: "ABC" }],
       [{ id: "line1", text: "ABC" }, { id: "line2", text: "ABC" }],
+      {
+        generateCommitId: mockGenerateCommitId,
+        generateLineId: mockGenerateLindId,
+      },
     );
     expect(actual.nextLines).toStrictEqual(
       [{ id: "line1", text: "ABC" }, { id: "line2", text: "ABC" }],
@@ -51,11 +58,15 @@ describe("calcNextLines()", () => {
   });
 
   test("update only #1", () => {
-    mockedCreateCommitId.mockReturnValueOnce("newcommit1");
+    mockGenerateCommitId.mockReturnValueOnce("newcommit1");
 
     const actual = calcNextLines(
       [{ id: "line1", text: "ABC" }],
       [{ id: "line1", text: "AB" }],
+      {
+        generateCommitId: mockGenerateCommitId,
+        generateLineId: mockGenerateLindId,
+      },
     );
     expect(actual.nextLines).toStrictEqual(
       [{ id: "line1", text: "AB" }],
@@ -69,11 +80,15 @@ describe("calcNextLines()", () => {
   });
 
   test("update only #2", () => {
-    mockedCreateCommitId.mockReturnValueOnce("newcommit1");
+    mockGenerateCommitId.mockReturnValueOnce("newcommit1");
 
     const actual = calcNextLines(
       [{ id: "line1", text: "ABC" }, { id: "line2", text: "ABC" }],
       [{ id: "line1", text: "ABC" }, { id: "line2", text: "AB" }],
+      {
+        generateCommitId: mockGenerateCommitId,
+        generateLineId: mockGenerateLindId,
+      },
     );
     expect(actual.nextLines).toStrictEqual(
       [{ id: "line1", text: "ABC" }, { id: "line2", text: "AB" }],
@@ -87,13 +102,17 @@ describe("calcNextLines()", () => {
   });
 
   test("update only #3", () => {
-    mockedCreateCommitId
+    mockGenerateCommitId
       .mockReturnValueOnce("newcommit1")
       .mockReturnValueOnce("newcommit2");
 
     const actual = calcNextLines(
       [{ id: "line1", text: "ABC" }, { id: "line2", text: "ABC" }],
       [{ id: "line1", text: "AB" }, { id: "line2", text: "AB" }],
+      {
+        generateCommitId: mockGenerateCommitId,
+        generateLineId: mockGenerateLindId,
+      },
     );
     expect(actual.nextLines).toStrictEqual(
       [{ id: "line1", text: "AB" }, { id: "line2", text: "AB" }],
@@ -108,10 +127,10 @@ describe("calcNextLines()", () => {
   });
 
   test("line break #1", () => {
-    mockedCreateCommitId
+    mockGenerateCommitId
       .mockReturnValueOnce("newcommit1")
       .mockReturnValueOnce("newcommit2");
-    mockedCreateLineId
+    mockGenerateLindId
       .mockReturnValueOnce("newline1");
 
     const actual = calcNextLines(
@@ -122,6 +141,10 @@ describe("calcNextLines()", () => {
         { id: "line1", text: "AB" },
         { id: "line1", text: "C" },
       ],
+      {
+        generateCommitId: mockGenerateCommitId,
+        generateLineId: mockGenerateLindId,
+      },
     );
     expect(actual.nextLines).toStrictEqual(
       [
@@ -147,10 +170,10 @@ describe("calcNextLines()", () => {
   });
 
   test("line break #2", () => {
-    mockedCreateCommitId
+    mockGenerateCommitId
       .mockReturnValueOnce("newcommit1")
       .mockReturnValueOnce("newcommit2");
-    mockedCreateLineId
+    mockGenerateLindId
       .mockReturnValueOnce("newline1");
 
     const actual = calcNextLines(
@@ -161,6 +184,10 @@ describe("calcNextLines()", () => {
         { id: "line1", text: "ABC" },
         { id: "line1", text: "" },
       ],
+      {
+        generateCommitId: mockGenerateCommitId,
+        generateLineId: mockGenerateLindId,
+      },
     );
     expect(actual.nextLines).toStrictEqual(
       [
@@ -181,10 +208,10 @@ describe("calcNextLines()", () => {
   });
 
   test("line break #3", () => {
-    mockedCreateCommitId
+    mockGenerateCommitId
       .mockReturnValueOnce("newcommit1")
       .mockReturnValueOnce("newcommit2");
-    mockedCreateLineId
+    mockGenerateLindId
       .mockReturnValueOnce("newline1");
 
     const actual = calcNextLines(
@@ -195,6 +222,10 @@ describe("calcNextLines()", () => {
         { id: "line1", text: "" },
         { id: "line1", text: "ABC" },
       ],
+      {
+        generateCommitId: mockGenerateCommitId,
+        generateLineId: mockGenerateLindId,
+      },
     );
     expect(actual.nextLines).toStrictEqual(
       [
@@ -220,10 +251,10 @@ describe("calcNextLines()", () => {
   });
 
   test("line fold #1", () => {
-    mockedCreateCommitId
+    mockGenerateCommitId
       .mockReturnValueOnce("newcommit1")
       .mockReturnValueOnce("newcommit2");
-    mockedCreateLineId
+    mockGenerateLindId
       .mockReturnValueOnce("newline1");
 
     const actual = calcNextLines(
@@ -234,6 +265,10 @@ describe("calcNextLines()", () => {
       [
         { id: "line1", text: "ABCDEF" },
       ],
+      {
+        generateCommitId: mockGenerateCommitId,
+        generateLineId: mockGenerateLindId,
+      },
     );
     expect(actual.nextLines).toStrictEqual(
       [
@@ -258,10 +293,10 @@ describe("calcNextLines()", () => {
   });
 
   test("line fold #2", () => {
-    mockedCreateCommitId
+    mockGenerateCommitId
       .mockReturnValueOnce("newcommit1")
       .mockReturnValueOnce("newcommit2");
-    mockedCreateLineId
+    mockGenerateLindId
       .mockReturnValueOnce("newline1");
 
     const actual = calcNextLines(
@@ -274,6 +309,10 @@ describe("calcNextLines()", () => {
         { id: "line1", text: "ABCDEF" },
         { id: "line3", text: "GHI" },
       ],
+      {
+        generateCommitId: mockGenerateCommitId,
+        generateLineId: mockGenerateLindId,
+      },
     );
     expect(actual.nextLines).toStrictEqual(
       [
@@ -299,11 +338,11 @@ describe("calcNextLines()", () => {
   });
 
   test("edit multiple lines #1", () => {
-    mockedCreateCommitId
+    mockGenerateCommitId
       .mockReturnValueOnce("newcommit1")
       .mockReturnValueOnce("newcommit2")
       .mockReturnValueOnce("newcommit3");
-    mockedCreateLineId
+    mockGenerateLindId
       .mockReturnValueOnce("newline1");
 
     const actual = calcNextLines(
@@ -316,6 +355,10 @@ describe("calcNextLines()", () => {
         { id: "line1", text: "AB" },
         { id: "line3", text: "HI" },
       ],
+      {
+        generateCommitId: mockGenerateCommitId,
+        generateLineId: mockGenerateLindId,
+      },
     );
     expect(actual.nextLines).toStrictEqual(
       [
@@ -346,12 +389,12 @@ describe("calcNextLines()", () => {
   });
 
   test("edit multiple lines #2", () => {
-    mockedCreateCommitId
+    mockGenerateCommitId
       .mockReturnValueOnce("newcommit1")
       .mockReturnValueOnce("newcommit2")
       .mockReturnValueOnce("newcommit3")
       .mockReturnValueOnce("newcommit4");
-    mockedCreateLineId
+    mockGenerateLindId
       .mockReturnValueOnce("newline1");
 
     const actual = calcNextLines(
@@ -365,6 +408,10 @@ describe("calcNextLines()", () => {
         { id: "line1", text: "AB" },
         { id: "line4", text: "KL" },
       ],
+      {
+        generateCommitId: mockGenerateCommitId,
+        generateLineId: mockGenerateLindId,
+      },
     );
     expect(actual.nextLines).toStrictEqual(
       [

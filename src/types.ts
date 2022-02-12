@@ -1,3 +1,9 @@
+export type ComitId = string;
+export type CommitIdGenerator = () => ComitId;
+
+export type LineId = string;
+export type LineIdGenerator = () => LineId;
+
 export type InsertCommit = {
   id: string;
   type: "INSERT";
@@ -13,4 +19,4 @@ export type DeleteCommit = {
   type: "DELETE";
   payload: { lineId: string; };
 };
-export type Commit = InsertCommit | UpdateCommit | DeleteCommit;
+export type CommitUnion = InsertCommit | UpdateCommit | DeleteCommit;

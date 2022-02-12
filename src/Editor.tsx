@@ -2,11 +2,12 @@ import { css } from "@emotion/css";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { buildLines } from "./builders";
-import { calcNextLines, Commit } from "./lines";
+import { calcNextLines } from "./calcNextLines";
+import { CommitUnion } from "./types";
 
 export const Editor: React.VFC<{
   online: { head: string; lines: { id: string; text: string; }[]; };
-  pushCommits(commits: Commit[]): void;
+  pushCommits(commits: CommitUnion[]): void;
   generateCommitId(): string;
   generateLineId(): string;
 }> = (
@@ -154,7 +155,7 @@ export const Editor: React.VFC<{
         });
       }
     }
-  }, [lines, pushCommits]);
+  }, [generateCommitId, generateLineId, lines, pushCommits]);
   return (
     <div className={css({ overflow: "hidden" })}>
       <div>
