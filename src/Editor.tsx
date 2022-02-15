@@ -1,17 +1,18 @@
 import { css } from "@emotion/css";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { Line } from ".";
 import { buildLines } from "./builders";
 import { calcNextLines } from "./calcNextLines";
 import { CommitUnion } from "./types";
 
 export const Editor: React.VFC<{
-  online: { head: string; lines: { id: string; text: string; }[]; };
+  lines: Line[];
   pushCommits(commits: CommitUnion[]): void;
   generateCommitId(): string;
   generateLineId(): string;
 }> = (
-  { online, pushCommits, generateCommitId, generateLineId },
+  { lines: onlineLines, pushCommits, generateCommitId, generateLineId },
 ) => {
   /*
   const [charPositions, setCharPosition] = useReducer(
@@ -60,11 +61,11 @@ export const Editor: React.VFC<{
   const selectionRef = useRef(document.getSelection());
   const [composed, setComposed] = useState(false); // IME用
 
-  const [lines, setCurrentLines] = useState<{ id: string; text: string; }[]>(online.lines);
-  const linesHTML = useMemo(() => buildLines(lines), [lines]);
+  const [localLines, setLocalLines] = useState<{ id: string; text: string; }[]>(onlineLines);
+  const linesHTML = useMemo(() => buildLines(localLines), [localLines]);
   useEffect(() => {
-    setCurrentLines(online.lines);
-  }, [online]);
+    setLocalLines(onlineLines);
+  }, [onlineLines]);
 
   const [selection, setSelection] = useState<
     { anchor: { position: string; offset: number; }; focus: { position: string; offset: number; }; }
@@ -131,14 +132,14 @@ export const Editor: React.VFC<{
       text: $line.textContent || "",
     }));
     const { nextLines, nextCursor, commits } = calcNextLines(
-      lines,
+      localLines,
       tempLines,
       {
         generateCommitId,
         generateLineId,
       },
     );
-    setCurrentLines(nextLines);
+    setLocalLines(nextLines);
     pushCommits(commits);
     setCursor((previous) => nextCursor || previous);
     if (!nextCursor) {
@@ -155,7 +156,7 @@ export const Editor: React.VFC<{
         });
       }
     }
-  }, [generateCommitId, generateLineId, lines, pushCommits]);
+  }, [generateCommitId, generateLineId, localLines, pushCommits]);
   return (
     <div className={css({ overflow: "hidden" })}>
       <div>

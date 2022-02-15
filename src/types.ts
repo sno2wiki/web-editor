@@ -20,3 +20,5 @@ export type DeleteCommit = {
   payload: { lineId: string; };
 };
 export type CommitUnion = InsertCommit | UpdateCommit | DeleteCommit;
+
+export type Line = { id: string; text: string; };
