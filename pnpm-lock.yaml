@@ -2,6 +2,7 @@ lockfileVersion: 5.3
 
 specifiers:
   '@emotion/css': ^11.7.1
+  '@sno2wiki/document-parser': link:packages/document-parser
   '@swc/core': ^1.2.138
   '@swc/jest': ^0.2.17
   '@tsconfig/node16': ^1.0.2
@@ -29,6 +30,7 @@ specifiers:
 
 dependencies:
   '@emotion/css': 11.7.1
+  '@sno2wiki/document-parser': link:packages/document-parser
   direction: 2.0.1
   react: 17.0.2
   react-dom: 17.0.2_react@17.0.2
