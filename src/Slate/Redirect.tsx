@@ -29,14 +29,6 @@ export const Redirect: React.FC<
     <span
       {...attributes}
       className={cx(css({ position: "relative" }))}
-      onMouseOver={(e) => {
-        const { left, right, top, bottom, width, height } = e.currentTarget.getBoundingClientRect();
-        setHover({ hover: true, mouse: { x: e.clientX, y: e.clientY } });
-        setState({ left, right, top, bottom, width, height });
-      }}
-      onMouseLeave={() => {
-        setHover({ hover: false });
-      }}
     >
       <a
         {...(clickable ? { contentEditable: false } : {})}
@@ -46,6 +38,14 @@ export const Redirect: React.FC<
           css({ color: "blue" }),
           clickable && css({ fontWeight: "bold" }),
         )}
+        onMouseOver={(e) => {
+          const { left, right, top, bottom, width, height } = e.currentTarget.getBoundingClientRect();
+          setHover({ hover: true, mouse: { x: e.clientX, y: e.clientY } });
+          setState({ left, right, top, bottom, width, height });
+        }}
+        onMouseLeave={() => {
+          setHover({ hover: false });
+        }}
       >
         {children}
       </a>
