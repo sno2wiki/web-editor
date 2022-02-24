@@ -7,9 +7,11 @@ export const withRedirects = (editor: Editor) => {
     return element.type === "redirect" ? true : isInline(element);
   };
 
+  /*
   editor.isVoid = (element) => {
     return element.type === "redirect" ? true : isVoid(element);
   };
+  */
 
   return editor;
 };
