@@ -1,4 +1,4 @@
-import { Decorate } from "./Editor2";
+import { Decorate } from "./types";
 
 export const tokenizor = (
   text: string,

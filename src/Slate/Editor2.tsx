@@ -1,54 +1,19 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { BaseEditor, BaseOperation, createEditor, Descendant, NodeEntry, Range, Text } from "slate";
+import { BaseOperation, createEditor, Descendant, NodeEntry, Range, Text } from "slate";
 import { withHistory } from "slate-history";
-import { Editable, ReactEditor, RenderElementProps, RenderLeafProps, Slate, withReact } from "slate-react";
+import { Editable, RenderElementProps, RenderLeafProps, Slate, withReact } from "slate-react";
 
+import { Element } from "./Element";
+import { EndpointsContext } from "./EndpointsContext";
 import { Leaf } from "./Leaf";
-import { Redirect } from "./Redirect";
 import { tokenizor } from "./tokenize";
 import { withRedirects } from "./withRedirects";
-
-export type Decorate = "bold" | "italic" | "monospace" | "del" | "wavy";
-
-export type ParagraphElement = { type: "paragraph"; children: any[]; };
-export type RedirectElement = { type: "redirect"; context: string | null; term: string; children: CustomText[]; };
-export type ElementUnion =
-  | ParagraphElement
-  | RedirectElement;
-
-type CustomText =
-  & { text: string; }
-  & (
-    | {} // eslint-disable-line @typescript-eslint/ban-types
-    | { bold: true; }
-    | { italic: true; }
-    | { monospace: true; }
-    | { wave: true; }
-    | { strike: true; }
-  );
-
-declare module "slate" {
-  interface CustomTypes {
-    Editor: BaseEditor & ReactEditor;
-    Element: ElementUnion;
-    Text: CustomText;
-  }
-}
-
-const Element = (props: RenderElementProps) => {
-  const { attributes, children, element } = props;
-  switch (element.type) {
-    case "redirect":
-      return <Redirect attributes={attributes} context={element.context} term={element.term}>{children}</Redirect>;
-    default:
-      return <p {...attributes}>{children}</p>;
-  }
-};
 
 export const Editor2: React.VFC<
   {
     lines: { id: string; text: string; }[];
     pushOperations: (operations: BaseOperation[]) => void;
+    redirectHref(context: string | null, term: string): string;
   }
 > = ({ pushOperations }) => {
   const editor = useMemo(
@@ -123,7 +88,12 @@ export const Editor2: React.VFC<
   const renderLeaf = useCallback((props: RenderLeafProps) => <Leaf {...props} />, []);
 
   return (
-    <>
+    <EndpointsContext.Provider
+      value={{
+        redirectHref: (context: string | null, term: string) =>
+          context ? `/redirects/${context}/${term}` : `/redirects/_/${term}`,
+      }}
+    >
       <Slate
         editor={editor}
         value={value}
@@ -183,6 +153,6 @@ export const Editor2: React.VFC<
           }}
         />
       </Slate>
-    </>
+    </EndpointsContext.Provider>
   );
 };

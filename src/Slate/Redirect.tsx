@@ -1,7 +1,9 @@
 import { css, cx } from "@emotion/css";
-import React, { useMemo, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 import { RenderElementProps, useSelected } from "slate-react";
+
+import { EndpointsContext } from "./EndpointsContext";
 
 export const Redirect: React.FC<
   {
@@ -18,9 +20,11 @@ export const Redirect: React.FC<
     | { hover: true; mouse: { x: number; y: number; }; }
   >({ hover: false });
 
+  const { redirectHref } = useContext(EndpointsContext);
+
   const href = useMemo(() => {
-    return context ? `/redirects/${context}/${term}` : `/redirects/_/${term}`;
-  }, [context, term]);
+    return redirectHref && redirectHref(context, term);
+  }, [context, redirectHref, term]);
 
   const selected = useSelected();
   const clickable = useMemo(() => !selected, [selected]);
@@ -33,7 +37,7 @@ export const Redirect: React.FC<
       <a
         {...(clickable ? { contentEditable: false } : {})}
         type="link"
-        href={href}
+        {...(href && { href })}
         className={cx(
           css({ color: "blue" }),
           clickable && css({ fontWeight: "bold" }),
