@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { BaseEditor, BaseOperation, createEditor, Descendant, Editor, NodeEntry, Range, Text, Transforms } from "slate";
+import { BaseEditor, BaseOperation, createEditor, Descendant, NodeEntry, Range, Text } from "slate";
 import { withHistory } from "slate-history";
 import { Editable, ReactEditor, RenderElementProps, RenderLeafProps, Slate, withReact } from "slate-react";
 
@@ -19,7 +19,7 @@ export type ElementUnion =
 type CustomText =
   & { text: string; }
   & (
-    | {}
+    | {} // eslint-disable-line @typescript-eslint/ban-types
     | { bold: true; }
     | { italic: true; }
     | { monospace: true; }
@@ -34,17 +34,6 @@ declare module "slate" {
     Text: CustomText;
   }
 }
-
-const insertRedirect = (editor: Editor) => {
-  const mention: RedirectElement = {
-    type: "redirect",
-    context: "sno2wiki",
-    term: "リダイレクト仕様",
-    children: [{ text: "" }],
-  };
-  Transforms.insertNodes(editor, mention);
-  Transforms.move(editor);
-};
 
 const Element = (props: RenderElementProps) => {
   const { attributes, children, element } = props;
@@ -66,7 +55,54 @@ export const Editor2: React.VFC<
     () => withRedirects(withReact(withHistory(createEditor()))),
     [],
   );
-  const [value, setValue] = useState<Descendant[]>(initValues // lines.map(({ text }) => ({ type: "paragraph", children: [{ text }] })),
+  const [value, setValue] = useState<Descendant[]>(
+    // lines.map(({ text }) => ({ type: "paragraph", children: [{ text }] })),
+    [
+      {
+        type: "paragraph",
+        children: [
+          {
+            text: "*bold*, _italic_, `codeblock`, ~wave~, -strike-",
+          },
+          {
+            type: "redirect",
+            context: "sno2wiki",
+            term: "リダイレクト仕様",
+            children: [
+              { text: "[sno2wiki=>リダイレクト仕様]" },
+            ],
+          },
+          {
+            text: "大丈夫ですよ",
+          },
+          {
+            type: "redirect",
+            context: "sno2wiki",
+            term: "エディタについて",
+            children: [
+              { text: "[sno2wiki=>エディタについて]" },
+            ],
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        children: [
+          {
+            text: "実験2",
+          },
+          {
+            type: "redirect",
+            context: "url",
+            term: "scrapbox.io/sno2wman",
+            children: [{ text: "[url=>scrapbox.io/sno2wman]" }],
+          },
+          {
+            text: "[]",
+          },
+        ],
+      },
+    ],
   );
 
   const decorate = useCallback(([node, path]: NodeEntry) => {
@@ -94,85 +130,59 @@ export const Editor2: React.VFC<
         onChange={(newValue) => {
           setValue(newValue);
           const { selection, operations } = editor;
-
           pushOperations(operations);
-
           if (selection && Range.isCollapsed(selection)) {
             const [start, end] = Range.edges(selection);
-            console.log(start, end);
           }
         }}
       >
         <Editable
           spellCheck={false}
-          decorate={decorate}
+          // decorate={decorate}
           renderElement={renderElement}
-          renderLeaf={renderLeaf}
+          // renderLeaf={renderLeaf}
           onKeyDown={(event) => {
             const { selection, operations } = editor;
+
+            /*
+            if (selection && Range.isCollapsed(selection)) {
+              const current = Editor.above<ElementUnion>(
+                editor,
+                { match: (n) => Editor.isBlock(editor, n) || Editor.isInline(editor, n) },
+              );
+              const inPlain = current?.[0]?.type === "paragraph";
+              const inRedirect = current?.[0]?.type === "redirect";
+
+              if (inPlain && event.ctrlKey && event.key === " ") {
+                const { anchor: midPoint } = selection;
+                const befPoint = { path: midPoint.path, offset: midPoint.offset - 1 };
+                const aftPoint = { path: midPoint.path, offset: midPoint.offset + 1 };
+
+                const befChar = Editor.string(editor, { anchor: befPoint, focus: midPoint });
+                const aftChar = Editor.string(editor, { anchor: midPoint, focus: aftPoint });
+
+                if (befChar === "[" && aftChar === "]") {
+                  console.log("!");
+                }
+              }
+            }
+            /*
             if (event.key === "[" || event.key === "]") {
               event.preventDefault();
               Transforms.insertText(editor, "[]");
               Transforms.move(editor, { distance: 1, unit: "character", reverse: true });
-            }
-            if (event.ctrlKey && event.key === "ArrowLeft") {
+            } else if (event.ctrlKey && event.key === "i") {
+              event.preventDefault();
+              insertRedirect(editor);
+            } else if (event.ctrlKey && event.key === "ArrowLeft") {
               event.preventDefault();
             } else if (event.ctrlKey && event.key === "ArrowRight") {
               event.preventDefault();
             }
+            */
           }}
         />
       </Slate>
-      <p>{JSON.stringify(value)}</p>
     </>
   );
 };
-
-const initValues: Descendant[] = [
-  {
-    type: "paragraph",
-    children: [
-      /*
-      { text: "*bold*", bold: true },
-      { text: "," },
-      { text: "_italic_", italic: true },
-      { text: "," },
-      { text: "`Codeblock`", monospace: true },
-      { text: "," },
-      { text: "~wave~", wave: true },
-      { text: "," },
-      { text: "-strike-", strike: true },
-      */
-      {
-        text: "*bold*, _italic_, `codeblock`, ~wave~, -strike-",
-      },
-      {
-        type: "redirect",
-        context: "sno2wiki",
-        term: "リダイレクト仕様",
-        children: [{ text: "" }],
-      },
-      {
-        text: "大丈夫ですよ",
-      },
-      { text: "" },
-    ],
-  },
-  {
-    type: "paragraph",
-    children: [
-      {
-        text: "実験2",
-      },
-      { text: "" },
-      /*
-      {
-        type: "redirect",
-        context: "sno2wiki",
-        term: "エディタについて",
-        children: [{ text: "" }],
-      },
-      */
-    ],
-  },
-];
