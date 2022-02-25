@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { RenderElementProps } from "slate-react";
 
 import { Redirect } from "./Redirect";
@@ -11,4 +11,8 @@ export const Element = (props: RenderElementProps) => {
     default:
       return <p {...attributes}>{children}</p>;
   }
+};
+
+export const useRenderElement = () => {
+  return useCallback((props: RenderElementProps) => <Element {...props} />, []);
 };

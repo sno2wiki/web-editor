@@ -1,13 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { createEditor, Descendant, NodeEntry, Range, Text } from "slate";
+import React, { useEffect, useMemo, useState } from "react";
+import { createEditor, Descendant } from "slate";
 import { withHistory } from "slate-history";
-import { Editable, RenderElementProps, RenderLeafProps, Slate, withReact } from "slate-react";
+import { Editable, Slate, withReact } from "slate-react";
 
-import { Element } from "./Element";
 import { EndpointsContext } from "./EndpointsContext";
-import { Leaf } from "./Leaf";
-import { tokenizor } from "./tokenize";
 import { EditorProps } from "./types";
+import { useDecorate } from "./useDecorate";
+import { useRenderElement } from "./useRenderElement";
+import { useRenderLeaf } from "./useRenderLeaf";
 import { withRedirects } from "./withRedirects";
 
 export const Editor: React.VFC<EditorProps> = ({ externalValue, pushValue, redirectHref }) => {
@@ -26,22 +26,9 @@ export const Editor: React.VFC<EditorProps> = ({ externalValue, pushValue, redir
     [externalValue],
   );
 
-  const decorate = useCallback(([node, path]: NodeEntry) => {
-    const ranges: Range[] = [];
-
-    if (!Text.isText(node)) return ranges;
-    const tokens = tokenizor(node.text);
-    for (const token of tokens) {
-      ranges.push({
-        [token.type]: true,
-        anchor: { path, offset: token.start },
-        focus: { path, offset: token.end },
-      });
-    }
-    return ranges;
-  }, []);
-  const renderElement = useCallback((props: RenderElementProps) => <Element {...props} />, []);
-  const renderLeaf = useCallback((props: RenderLeafProps) => <Leaf {...props} />, []);
+  const decorate = useDecorate();
+  const renderElement = useRenderElement();
+  const renderLeaf = useRenderLeaf();
 
   return (
     <EndpointsContext.Provider value={{ redirectHref }}>
@@ -59,9 +46,9 @@ export const Editor: React.VFC<EditorProps> = ({ externalValue, pushValue, redir
           autoCorrect={"off"}
           autoCapitalize={"none"}
           translate={"no"}
-          // decorate={decorate}
+          decorate={decorate}
           renderElement={renderElement}
-          // renderLeaf={renderLeaf}
+          renderLeaf={renderLeaf}
           onKeyDown={(event) => {
             const { selection, operations } = editor;
 

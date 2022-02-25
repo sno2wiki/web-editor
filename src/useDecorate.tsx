@@ -1,3 +1,6 @@
+import { useCallback } from "react";
+import { NodeEntry, Range, Text } from "slate";
+
 import { Decorate } from "./types";
 
 export const tokenizor = (
@@ -24,4 +27,21 @@ export const tokenizor = (
   simpleDecorate("\\~[^\\~]+?\\~", "wavy");
 
   return tokens;
+};
+
+export const useDecorate = () => {
+  return useCallback(([node, path]: NodeEntry) => {
+    const ranges: Range[] = [];
+
+    if (!Text.isText(node)) return ranges;
+    const tokens = tokenizor(node.text);
+    for (const token of tokens) {
+      ranges.push({
+        [token.type]: true,
+        anchor: { path, offset: token.start },
+        focus: { path, offset: token.end },
+      });
+    }
+    return ranges;
+  }, []);
 };

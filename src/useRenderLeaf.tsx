@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import React from "react";
+import React, { useCallback } from "react";
 import { RenderLeafProps } from "slate-react";
 
 export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
@@ -74,4 +74,8 @@ export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
       </span>
     );
   }
+};
+
+export const useRenderLeaf = () => {
+  return useCallback((props: RenderLeafProps) => <Leaf {...props} />, []);
 };
