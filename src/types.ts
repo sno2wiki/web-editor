@@ -6,11 +6,11 @@ export type EditorValue = Descendant[];
 
 export type CalcRedirectHref = (context: string | null, term: string) => string;
 
-export interface EditorProps {
+export type EditorProps = {
   externalValue: EditorValue;
   pushValue(value: EditorValue): void;
   redirectHref: CalcRedirectHref;
-}
+};
 
 export type Decorate = "bold" | "italic" | "monospace" | "del" | "wavy";
 
