@@ -1,5 +1,8 @@
-import { BaseEditor } from "slate";
+import { BaseEditor, BaseOperation } from "slate";
 import { ReactEditor } from "slate-react";
+export type { BaseOperation, Descendant } from "slate";
+
+export type PushOperations = (operations: BaseOperation[]) => void;
 
 export type Decorate = "bold" | "italic" | "monospace" | "del" | "wavy";
 

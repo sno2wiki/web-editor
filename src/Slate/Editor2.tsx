@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo, useState } from "react";
-import { BaseOperation, createEditor, Descendant, NodeEntry, Range, Text } from "slate";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { createEditor, Descendant, NodeEntry, Range, Text } from "slate";
 import { withHistory } from "slate-history";
 import { Editable, RenderElementProps, RenderLeafProps, Slate, withReact } from "slate-react";
 
@@ -11,63 +11,24 @@ import { withRedirects } from "./withRedirects";
 
 export const Editor2: React.VFC<
   {
-    lines: { id: string; text: string; }[];
-    pushOperations: (operations: BaseOperation[]) => void;
+    externalValue: Descendant[];
+    pushValue(value: Descendant[]): void;
     redirectHref(context: string | null, term: string): string;
   }
-> = ({ pushOperations }) => {
+> = ({ externalValue, pushValue: pushValues, redirectHref }) => {
   const editor = useMemo(
     () => withRedirects(withReact(withHistory(createEditor()))),
     [],
   );
-  const [value, setValue] = useState<Descendant[]>(
-    // lines.map(({ text }) => ({ type: "paragraph", children: [{ text }] })),
-    [
-      {
-        type: "paragraph",
-        children: [
-          {
-            text: "*bold*, _italic_, `codeblock`, ~wave~, -strike-",
-          },
-          {
-            type: "redirect",
-            context: "sno2wiki",
-            term: "リダイレクト仕様",
-            children: [
-              { text: "[sno2wiki=>リダイレクト仕様]" },
-            ],
-          },
-          {
-            text: "大丈夫ですよ",
-          },
-          {
-            type: "redirect",
-            context: "sno2wiki",
-            term: "エディタについて",
-            children: [
-              { text: "[sno2wiki=>エディタについて]" },
-            ],
-          },
-        ],
-      },
-      {
-        type: "paragraph",
-        children: [
-          {
-            text: "実験2",
-          },
-          {
-            type: "redirect",
-            context: "url",
-            term: "scrapbox.io/sno2wman",
-            children: [{ text: "[url=>scrapbox.io/sno2wman]" }],
-          },
-          {
-            text: "[]",
-          },
-        ],
-      },
-    ],
+  const [value, setValue] = useState<Descendant[]>(externalValue);
+
+  useEffect(
+    () => {
+      setValue(externalValue);
+      editor.children = externalValue;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [externalValue],
   );
 
   const decorate = useCallback(([node, path]: NodeEntry) => {
@@ -88,22 +49,13 @@ export const Editor2: React.VFC<
   const renderLeaf = useCallback((props: RenderLeafProps) => <Leaf {...props} />, []);
 
   return (
-    <EndpointsContext.Provider
-      value={{
-        redirectHref: (context: string | null, term: string) =>
-          context ? `/redirects/${context}/${term}` : `/redirects/_/${term}`,
-      }}
-    >
+    <EndpointsContext.Provider value={{ redirectHref }}>
       <Slate
         editor={editor}
         value={value}
         onChange={(newValue) => {
           setValue(newValue);
-          const { selection, operations } = editor;
-          pushOperations(operations);
-          if (selection && Range.isCollapsed(selection)) {
-            const [start, end] = Range.edges(selection);
-          }
+          pushValues(newValue);
         }}
       >
         <Editable
