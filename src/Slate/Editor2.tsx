@@ -7,15 +7,10 @@ import { Element } from "./Element";
 import { EndpointsContext } from "./EndpointsContext";
 import { Leaf } from "./Leaf";
 import { tokenizor } from "./tokenize";
+import { EditorProps } from "./types";
 import { withRedirects } from "./withRedirects";
 
-export const Editor2: React.VFC<
-  {
-    externalValue: Descendant[];
-    pushValue(value: Descendant[]): void;
-    redirectHref(context: string | null, term: string): string;
-  }
-> = ({ externalValue, pushValue: pushValues, redirectHref }) => {
+export const Editor2: React.VFC<EditorProps> = ({ externalValue, pushValue, redirectHref }) => {
   const editor = useMemo(
     () => withRedirects(withReact(withHistory(createEditor()))),
     [],
@@ -55,7 +50,7 @@ export const Editor2: React.VFC<
         value={value}
         onChange={(newValue) => {
           setValue(newValue);
-          pushValues(newValue);
+          pushValue(newValue);
         }}
       >
         <Editable

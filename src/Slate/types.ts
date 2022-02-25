@@ -1,8 +1,16 @@
-import { BaseEditor, BaseOperation } from "slate";
+import { BaseEditor, Descendant } from "slate";
 import { ReactEditor } from "slate-react";
 export type { BaseOperation, Descendant } from "slate";
 
-export type PushOperations = (operations: BaseOperation[]) => void;
+export type EditorValue = Descendant[];
+
+export type CalcRedirectHref = (context: string | null, term: string) => string;
+
+export interface EditorProps {
+  externalValue: EditorValue;
+  pushValue(value: EditorValue): void;
+  redirectHref: CalcRedirectHref;
+}
 
 export type Decorate = "bold" | "italic" | "monospace" | "del" | "wavy";
 
