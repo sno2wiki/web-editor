@@ -1,24 +1,39 @@
-export type ComitId = string;
-export type CommitIdGenerator = () => ComitId;
+import { BaseEditor, Descendant } from "slate";
+import { ReactEditor } from "slate-react";
+export type { BaseOperation, Descendant } from "slate";
 
-export type LineId = string;
-export type LineIdGenerator = () => LineId;
+export type EditorValue = Descendant[];
 
-export type InsertCommit = {
-  id: string;
-  type: "INSERT";
-  payload: { prevLineId: string; newLineId: string; text: string; };
-};
-export type UpdateCommit = {
-  id: string;
-  type: "UPDATE";
-  payload: { lineId: string; text: string; };
-};
-export type DeleteCommit = {
-  id: string;
-  type: "DELETE";
-  payload: { lineId: string; };
-};
-export type CommitUnion = InsertCommit | UpdateCommit | DeleteCommit;
+export type CalcRedirectHref = (context: string | null, term: string) => string;
 
-export type Line = { id: string; text: string; };
+export interface EditorProps {
+  externalValue: EditorValue;
+  pushValue(value: EditorValue): void;
+  redirectHref: CalcRedirectHref;
+}
+
+export type Decorate = "bold" | "italic" | "monospace" | "del" | "wavy";
+
+export type ParagraphElement = { type: "paragraph"; children: any[]; };
+export type RedirectElement = { type: "redirect"; context: string | null; term: string; children: CustomText[]; };
+export type ElementUnion =
+  | ParagraphElement
+  | RedirectElement;
+type CustomText =
+  & { text: string; }
+  & (
+    | {} // eslint-disable-line @typescript-eslint/ban-types
+    | { bold: true; }
+    | { italic: true; }
+    | { monospace: true; }
+    | { wave: true; }
+    | { strike: true; }
+  );
+
+declare module "slate" {
+  interface CustomTypes {
+    Editor: BaseEditor & ReactEditor;
+    Element: ElementUnion;
+    Text: CustomText;
+  }
+}
