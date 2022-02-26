@@ -11,6 +11,10 @@ export type EditorProps = {
   pushValue(value: EditorValue): void;
   redirectHref: CalcRedirectHref;
 };
+export type ViewerProps = {
+  externalValue: EditorProps["externalValue"];
+  redirectHref: EditorProps["redirectHref"];
+};
 
 export type Decorate = "bold" | "italic" | "monospace" | "del" | "wavy";
 
