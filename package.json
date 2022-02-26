@@ -13,9 +13,13 @@
   },
   "dependencies": {
     "@emotion/css": "^11.7.1",
+    "@sno2wiki/document-parser": "link:packages/document-parser",
     "direction": "^2.0.1",
     "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react-dom": "^17.0.2",
+    "slate": "^0.72.8",
+    "slate-history": "^0.66.0",
+    "slate-react": "^0.72.9"
   },
   "devDependencies": {
     "@swc/core": "^1.2.138",
