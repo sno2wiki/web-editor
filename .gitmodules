@@ -1,3 +1,0 @@
-[submodule "packages/document-parser"]
-	path = packages/document-parser
-	url = git@github.com:sno2wiki/document-parser.git
