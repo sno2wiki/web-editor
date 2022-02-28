@@ -8,7 +8,8 @@ export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
       <code
         {...attributes}
         className={css({
-          fontFamily: "monospace",
+          fontFamily: "var(--editor-text-monospace-font-family)",
+          backgroundColor: "var(--editor-text-monospace-bg-color)",
         })}
       >
         {children}
@@ -19,7 +20,6 @@ export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
       <strong
         {...attributes}
         className={css({
-          fontFamily: "sans-serif",
           fontWeight: "bold",
         })}
       >
@@ -31,7 +31,6 @@ export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
       <i
         {...attributes}
         className={css({
-          fontFamily: "sans-serif",
           fontStyle: "italic",
         })}
       >
@@ -43,7 +42,6 @@ export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
       <del
         {...attributes}
         className={css({
-          fontFamily: "sans-serif",
           textDecoration: "line-through",
         })}
       >
@@ -55,7 +53,6 @@ export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
       <span
         {...attributes}
         className={css({
-          fontFamily: "sans-serif",
           textDecoration: "wavy underline",
         })}
       >
@@ -66,9 +63,7 @@ export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
     return (
       <span
         {...attributes}
-        className={css({
-          fontFamily: "sans-serif",
-        })}
+        className={css({})}
       >
         {children}
       </span>

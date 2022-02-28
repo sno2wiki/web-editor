@@ -39,7 +39,11 @@ export const Redirect: React.FC<
         type="link"
         {...(href && { href })}
         className={cx(
-          css({ color: "blue" }),
+          css(
+            {
+              color: "var(--editor-redirect-text-color)",
+            },
+          ),
           clickable && css({ fontWeight: "bold" }),
         )}
         onMouseOver={(e) => {
@@ -79,13 +83,17 @@ export const Preview: React.VFC<{
         userSelect: "none",
         padding: "16px 12px",
         borderRadius: "4px",
-        background: "#FFFe",
-        boxShadow: "0 8px 16px #0004",
-        border: "1px solid #0004",
+        backgroundColor: "var(--editor-redirect-preview-bg-color)",
         backdropFilter: "blur(1px)",
       })}
     >
-      <p className={css({ fontSize: "0.75rem" })}>
+      <p
+        className={css({
+          color: "var(--editor-redirect-preview-text-color)",
+          fontSize: "var(--editor-redirect-preview-font-size)",
+          fontFamily: "var(--editor-redirect-preview-font-family)",
+        })}
+      >
         {term}@{context}
       </p>
     </div>,

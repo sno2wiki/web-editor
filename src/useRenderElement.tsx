@@ -1,3 +1,4 @@
+import { css } from "@emotion/css";
 import React, { useCallback } from "react";
 import { RenderElementProps } from "slate-react";
 
@@ -9,7 +10,19 @@ export const Element = (props: RenderElementProps) => {
     case "redirect":
       return <Redirect attributes={attributes} context={element.context} term={element.term}>{children}</Redirect>;
     default:
-      return <p {...attributes}>{children}</p>;
+      return (
+        <p
+          className={css({
+            lineHeight: "1.8em",
+            color: "var(--editor-text-color)",
+            fontSize: "var(--editor-text-font-size)",
+            fontFamily: "var(--editor-text-font-family)",
+          })}
+          {...attributes}
+        >
+          {children}
+        </p>
+      );
   }
 };
 
